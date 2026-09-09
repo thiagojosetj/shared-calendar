@@ -1,0 +1,27 @@
+# Normaliza fim de linha no repositorio (LF), independente do core.autocrlf da maquina.
+* text=auto eol=lf
+
+# Scripts que precisam obrigatoriamente de LF para funcionar em Linux/containers.
+*.sh        text eol=lf
+mvnw        text eol=lf
+gradlew     text eol=lf
+Dockerfile  text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf
+
+# Scripts que precisam obrigatoriamente de CRLF no Windows.
+*.bat       text eol=crlf
+*.cmd       text eol=crlf
+mvnw.cmd    text eol=crlf
+
+# Binarios: nunca aplicar conversao de fim de linha.
+*.png       binary
+*.jpg       binary
+*.jpeg      binary
+*.gif       binary
+*.webp      binary
+*.ico       binary
+*.pdf       binary
+*.jar       binary
+*.woff      binary
+*.woff2     binary

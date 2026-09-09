@@ -1,0 +1,96 @@
+# ---------------------------------------------------------------------------
+# Segredos e configuracao local
+# ---------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+*.local
+secrets/
+*.pem
+*.key
+*.p12
+*.jks
+*.keystore
+id_rsa*
+id_ed25519*
+*.ppk
+
+# ---------------------------------------------------------------------------
+# Java / Maven
+# ---------------------------------------------------------------------------
+target/
+build/
+out/
+*.class
+*.jar
+!**/maven-wrapper.jar
+!**/gradle-wrapper.jar
+*.war
+*.ear
+*.log
+hs_err_pid*
+replay_pid*
+.mvn/wrapper/maven-wrapper.jar
+
+# ---------------------------------------------------------------------------
+# Node / frontend
+# ---------------------------------------------------------------------------
+node_modules/
+dist/
+dist-ssr/
+.vite/
+coverage/
+.nyc_output/
+*.tsbuildinfo
+.eslintcache
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+playwright-report/
+test-results/
+blob-report/
+.playwright/
+
+# ---------------------------------------------------------------------------
+# IDEs e editores
+# ---------------------------------------------------------------------------
+.idea/
+!.idea/runConfigurations/
+*.iml
+*.ipr
+*.iws
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.shared.json
+.settings/
+.project
+.classpath
+.factorypath
+nbproject/
+*.swp
+*.swo
+*~
+
+# ---------------------------------------------------------------------------
+# Sistema operacional
+# ---------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# ---------------------------------------------------------------------------
+# Docker / dados locais
+# ---------------------------------------------------------------------------
+.docker-data/
+pgdata/
+*.dump
+*.sql.gz
+
+# ---------------------------------------------------------------------------
+# Ferramentas de agente / scratch
+# ---------------------------------------------------------------------------
+.claude/settings.local.json
+scratch/
+tmp/
