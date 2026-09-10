@@ -1,0 +1,20 @@
+# Perfil de desenvolvimento local.
+# Ativado com SPRING_PROFILES_ACTIVE=dev (definido no .env da raiz do projeto).
+spring:
+  jpa:
+    properties:
+      hibernate:
+        # Formata o SQL logado. Só faz sentido em desenvolvimento.
+        format_sql: true
+
+logging:
+  level:
+    # SQL executado pelo Hibernate. Útil para enxergar N+1 durante o desenvolvimento.
+    org.hibernate.SQL: DEBUG
+    io.github.thiagojosetj.sharedcalendar: DEBUG
+
+management:
+  endpoint:
+    health:
+      # Em desenvolvimento o detalhe do health ajuda a ver se o banco está de pé.
+      show-details: always

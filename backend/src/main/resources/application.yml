@@ -1,0 +1,57 @@
+spring:
+  application:
+    name: shared-calendar
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${POSTGRES_DB:shared_calendar}
+    username: ${POSTGRES_USER:shared_calendar}
+    # Sem valor padrão de propósito: a aplicação deve falhar ao subir se a senha não vier
+    # do ambiente, em vez de tentar uma senha embutida.
+    password: ${POSTGRES_PASSWORD}
+
+  jpa:
+    hibernate:
+      # NUNCA `update` ou `create-drop`. O schema é versionado exclusivamente pelo Flyway.
+      # `validate` faz a aplicação recusar-se a subir se as entidades e o schema divergirem.
+      ddl-auto: validate
+    # Desliga o Open Session In View: sem isso, o Hibernate mantém a sessão aberta durante a
+    # renderização da resposta e mascara consultas N+1 que só aparecem em produção.
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          # Garante que o driver não reinterprete timestamps usando o fuso da JVM (ADR-0002).
+          time_zone: UTC
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  jackson:
+    serialization:
+      # Instant vira "2026-09-12T17:00:00Z", não um número epoch ambíguo (ADR-0002).
+      write-dates-as-timestamps: false
+    default-property-inclusion: non_null
+
+server:
+  port: ${SERVER_PORT:8080}
+  error:
+    # Nenhuma resposta de erro expõe stack trace ou mensagem interna ao cliente (RN-SEC-05).
+    include-message: never
+    include-stacktrace: never
+    include-binding-errors: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true
+
+logging:
+  level:
+    root: INFO
