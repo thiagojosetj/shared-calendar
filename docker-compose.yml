@@ -1,0 +1,51 @@
+# Infraestrutura local do Shared Calendar.
+#
+# Todos os recursos usam nomes próprios do projeto (prefixo `shared-calendar-`) para nunca colidir
+# com containers, redes ou volumes de outros projetos da máquina.
+#
+# Uso:
+#   cp .env.example .env      # ajuste os valores locais
+#   docker compose up -d
+#   docker compose ps
+#   docker compose down       # NUNCA use `down -v`: isso apaga o volume com os dados
+
+name: shared-calendar
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: shared-calendar-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-shared_calendar}
+      POSTGRES_USER: ${POSTGRES_USER:-shared_calendar}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no arquivo .env}
+      # O container roda em UTC de propósito: nenhuma regra de negócio pode depender
+      # do fuso do servidor (ADR-0002). Se algo depender, tem que quebrar em desenvolvimento.
+      TZ: UTC
+      PGTZ: UTC
+    ports:
+      # Exposto apenas em localhost. Publicar em 0.0.0.0 deixaria o banco de desenvolvimento
+      # acessível na rede local.
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - backend
+    healthcheck:
+      # `pg_isready` sozinho responde OK cedo demais, durante a inicialização do cluster.
+      # Restringir ao usuário e ao banco da aplicação garante que o healthcheck só fica
+      # verde quando dá para conectar de verdade.
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-shared_calendar} -d ${POSTGRES_DB:-shared_calendar}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+volumes:
+  postgres-data:
+    name: shared-calendar-postgres-data
+
+networks:
+  backend:
+    name: shared-calendar-network
