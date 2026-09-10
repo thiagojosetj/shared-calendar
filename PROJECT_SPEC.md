@@ -167,7 +167,8 @@ microserviços, mensageria distribuída ou IA como dependência central.
 
 | ID | Regra | Escopo |
 |---|---|---|
-| `RN-AUTZ-20` | O catálogo inicial de permissões é: `VIEW_CALENDAR`, `CREATE_EVENT`, `EDIT_OWN_EVENT`, `EDIT_ANY_EVENT`, `DELETE_OWN_EVENT`, `DELETE_ANY_EVENT`, `MANAGE_MEMBERS`, `MANAGE_ROLES`, `MANAGE_GROUP`, `MANAGE_NOTES`, `VIEW_AUDIT_LOG`, `TRANSFER_OWNERSHIP`, `DELETE_GROUP`. | MVP |
+| `RN-AUTZ-20` | O catálogo de permissões concedíveis é: `VIEW_CALENDAR`, `RSVP_EVENT`, `CREATE_EVENT`, `EDIT_OWN_EVENT`, `EDIT_ANY_EVENT`, `DELETE_OWN_EVENT`, `DELETE_ANY_EVENT`, `MANAGE_MEMBERS`, `MANAGE_ROLES`, `MANAGE_GROUP`, `MANAGE_NOTES`, `VIEW_AUDIT_LOG`. | MVP |
+| `RN-AUTZ-20a` | Transferir a propriedade e excluir o grupo **não** são permissões concedíveis: são ações exclusivas do `OWNER`, verificadas por caminho próprio. Mantê-las fora do catálogo torna impossível escalar até dono por meio de um override. Ver [ADR-0004](docs/adr/0004-modelo-de-autorizacao-rbac.md). | MVP |
 | `RN-AUTZ-21` | Cada papel mapeia para um conjunto fixo e documentado de permissões. | MVP |
 | `RN-AUTZ-22` | É possível registrar **overrides por membro**, concedendo ou revogando uma permissão específica sem trocar o papel. | PÓS-MVP |
 | `RN-AUTZ-23` | Precedência de resolução: `DENY` explícito vence `GRANT` explícito, que vence o padrão do papel. Um `DENY` nunca pode violar `RN-AUTZ-10`. | PÓS-MVP |
