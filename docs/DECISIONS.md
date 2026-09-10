@@ -15,9 +15,17 @@ zero, ficam listadas aqui mesmo.
 
 ## Índice de ADRs
 
-| ADR | Título | Status |
-|---|---|---|
-| — | *Em elaboração (item F0-02 do roadmap).* | — |
+| ADR | Título | Decisão em uma linha | Status |
+|---|---|---|---|
+| [0001](adr/0001-estrutura-do-repositorio-e-arquitetura-do-backend.md) | Estrutura do repositório e arquitetura do backend | Monorepo; pacotes por domínio com regra de dependência verificada por ArchUnit; UUID v7; testes contra PostgreSQL real | Aceito |
+| [0002](adr/0002-datas-horas-e-fuso-horario.md) | Datas, horas e fuso horário | `Instant` para momentos, `LocalDate` para dia inteiro, fuso de referência guardado junto; `LocalDateTime` proibido; `Clock` injetável | Aceito |
+| [0003](adr/0003-autenticacao-e-sessao.md) | Autenticação e sessão | Sessão server-side com cookie `HttpOnly` em vez de JWT, pela revogação imediata; Google sem vínculo automático por e-mail | Aceito |
+| [0004](adr/0004-modelo-de-autorizacao-rbac.md) | Modelo de autorização (RBAC) | Papéis fixos em enum + overrides, resolvidos por um `PermissionResolver` único e aplicados por policies de domínio | Aceito |
+| [0005](adr/0005-eventos-em-multiplos-grupos.md) | Eventos em múltiplos grupos | Junção `event_group` com grupos-pares; autoridade ancorada na autoria imutável; agregação `ANY`/`ALL` por operação | Aceito |
+| [0006](adr/0006-soft-delete-lixeira-e-auditoria.md) | Soft delete, lixeira e auditoria | `@SQLRestriction` + repositório dedicado para a lixeira; purga idempotente em lotes; audit log polimórfico que sobrevive à purga | Aceito |
+| [0007](adr/0007-disponibilidade-e-privacidade.md) | Disponibilidade e privacidade | A projeção `BusyInterval` não tem campo de conteúdo — o tipo impede o vazamento; cálculo é domínio puro | Aceito |
+| [0008](adr/0008-modelo-de-eventos-recorrentes.md) | Eventos recorrentes | `RRULE` do RFC 5545 + tabela de exceções + expansão sob demanda; nunca materializar | Aceito |
+| [0009](adr/0009-plataforma-do-frontend.md) | Plataforma do frontend | FullCalendar (plugins MIT) atrás de adaptador; CSS Modules + tokens; TanStack Query; tipos gerados do OpenAPI | Aceito |
 
 ## Decisões menores registradas
 

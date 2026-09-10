@@ -5,7 +5,7 @@ ficam em [`ROADMAP.md`](ROADMAP.md).
 
 **Última atualização:** 2026-09-09
 **Fase atual:** Fase 0 — Fundação
-**Item em andamento:** F0-02 — Decisões arquiteturais registradas
+**Item em andamento:** F0-03 — Infraestrutura local com Docker Compose
 
 ---
 
@@ -19,6 +19,7 @@ ficam em [`ROADMAP.md`](ROADMAP.md).
 | README | Descreve o problema, a proposta e o status honesto |
 | Git | Repositório inicializado, branch `main`, identidade configurada **localmente** |
 | `.gitignore` / `.gitattributes` | Cobrem secrets, builds, IDE e normalização de fim de linha |
+| ADRs | Nove decisões arquiteturais aceitas e indexadas em `docs/DECISIONS.md` (item F0-02 concluído) |
 
 ## O que ainda NÃO existe
 
@@ -30,7 +31,6 @@ Nada abaixo está implementado. Não apresentar nenhum destes itens como pronto.
 - migrations Flyway;
 - `.env.example`;
 - qualquer entidade, endpoint, tela ou teste;
-- ADRs (em elaboração);
 - CI;
 - repositório remoto no GitHub.
 
@@ -54,6 +54,5 @@ Preenchido conforme o projeto avança.
 
 ## Próximo passo
 
-Concluir F0-02: registrar os ADRs de autenticação, RBAC, datas/fusos, recorrência, eventos multi-grupo,
-disponibilidade, soft delete/auditoria, plataforma backend e plataforma frontend; e indexá-los em
-[`DECISIONS.md`](DECISIONS.md).
+F0-03: `docker-compose.yml` com PostgreSQL (rede, volume e container com nomes próprios do projeto),
+`.env.example` e `docs/local-development.md`. Requer o Docker Desktop aberto para validação real.
