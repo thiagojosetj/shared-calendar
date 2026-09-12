@@ -4,180 +4,176 @@ Estado **real** do repositório. Este documento descreve apenas o que já existe
 ficam em [`ROADMAP.md`](ROADMAP.md).
 
 **Última atualização:** 2026-09-12
-**Fase atual:** Fase 0 — Fundação
-**Concluído:** F0-01, F0-02, F0-03
-**Validado com pendências:** F0-04
-**Parcial:** F0-06 — teste de integração com Testcontainers pronto; teste de frontend e CI pendentes
+**Fase atual:** Fase 0 — Fundação, **concluída** com uma ressalva (a CI ainda não rodou no GitHub)
+**Próxima fase:** Fase 1 — Autenticação, perfil e calendário pessoal
 
 ---
 
-## O que já existe
+## Resumo por item
 
-| Área | Situação | Verificado como |
+| Item | Situação | Ressalva |
 |---|---|---|
-| Documentação de produto | `PROJECT_SPEC.md` com regras `RN-*`, glossário e casos de uso | leitura |
-| Regras de trabalho | `AGENTS.md` com ambiente verificado e convenções | leitura |
-| Roadmap | `docs/ROADMAP.md` com fases, itens e critérios de aceite | leitura |
-| ADRs | Nove decisões aceitas, indexadas em `docs/DECISIONS.md` | leitura |
-| Banco em container | PostgreSQL 18.6 via Docker Compose | `docker compose ps` → `Up (healthy)` |
-| Backend | Spring Boot 4.1.1 / Java 21 sobe no perfil `dev` contra o banco do Compose | log `Started SharedCalendarApplication` |
-| Migration | `V1__create_app_user.sql` aplicada | `flyway_schema_history` → `success = t` |
-| Testes unitários | 5 testes de `UuidV7` | `./mvnw test` → `Tests run: 5, Failures: 0, Errors: 0` |
-| Testes de integração | `FoundationIT`, 7 testes contra PostgreSQL 18 real via Testcontainers | `./mvnw verify` → `Tests run: 7, Failures: 0, Errors: 0`, `BUILD SUCCESS` |
+| F0-01 Documentação inicial | Concluído | — |
+| F0-02 Decisões arquiteturais | Concluído | Só o ADR-0003 passou por revisão adversarial |
+| F0-03 Infraestrutura local | Concluído | — |
+| F0-04 Esqueleto do backend | Concluído | — |
+| F0-05 Esqueleto do frontend | Concluído | — |
+| F0-06 Testes mínimos e CI | Concluído localmente | O workflow foi validado executando seus passos localmente; a primeira execução real no GitHub Actions depende do repositório remoto |
 
-## F0-03 — Infraestrutura local: concluído
+## Como a Fase 0 foi verificada
 
-Verificado em 2026-09-12:
+Verificação final de ponta a ponta em 2026-09-12, seguindo os comandos do `README.md`:
 
-| Critério de aceite | Evidência |
+| Verificação | Resultado |
 |---|---|
-| `docker compose up -d` sobe o PostgreSQL com healthcheck | `docker compose ps` → `Up (healthy)`, `RestartCount 0`, saudável em ~4 s |
-| Nomes exclusivos do projeto | container `shared-calendar-postgres`, rede `shared-calendar-network`, volume `shared-calendar-postgres-data` |
-| Dados em UTC | `show timezone` → `UTC` |
-| Volume na raiz exigida pelo PostgreSQL 18 | `show data_directory` → `/var/lib/postgresql/18/docker` |
-| Derrubar e subir preservando o volume | `docker compose down` (sem `-v`) + `up -d` → `flyway_schema_history` e as 11 colunas de `app_user` continuam presentes |
-| `.env.example` sem valores reais; `.env` ignorado | `git check-ignore -v .env` |
-| Guia de execução local | `docs/local-development.md`, com troubleshooting do erro do PostgreSQL 18 |
+| `docker compose ps` | `shared-calendar-postgres Up (healthy)` |
+| `./mvnw spring-boot:run -Dspring-boot.run.profiles=dev` | perfil `dev` ativo, aplicação no ar em ~4 s, nenhuma senha no log |
+| `curl localhost:5173/actuator/health` (pelo proxy do Vite) | `200`, `"status":"UP"` |
+| `curl localhost:5173/api/v1/qualquer` | `401`, sem `Set-Cookie: JSESSIONID` |
+| `curl -X POST localhost:5173/api/v1/qualquer` | `403` (CSRF) |
+| `http://localhost:5173` no navegador | página inicial com "A API está disponível."; nenhuma requisição com erro durante a verificação |
 
-Correção necessária para chegar aqui: o volume estava montado em `/var/lib/postgresql/data`, que a imagem
-oficial do PostgreSQL 18 recusa. O container entrava em loop `Restarting (1)`. O volume passou a ser
-montado em `/var/lib/postgresql`.
+Simulação local da CI, a partir de estado limpo:
 
-## F0-04 — Esqueleto do backend: validado contra o banco, com pendências
-
-Verificado em 2026-09-12, com o backend rodando no perfil `dev` e as variáveis do `.env`:
-
-| Verificação | Comando | Resultado |
+| Job | Comandos | Resultado |
 |---|---|---|
-| Perfil ativo | log de inicialização | `The following 1 profile is active: "dev"` |
-| Flyway aplicou a V1 | `select … from flyway_schema_history` via `docker compose exec postgres psql` | versão `1`, `V1__create_app_user.sql`, `success = t` |
-| Tabela criada conforme a migration | `\d app_user` via `psql` | 11 colunas, PK, índices únicos `ux_app_user_email` e `ux_app_user_handle` sobre `lower(...)`, checks `ck_app_user_status` e `ck_app_user_public_handle_format` |
-| `ddl-auto=validate` aceitou o schema | log de inicialização | aplicação iniciou sem erro de validação |
-| Health check | `curl http://localhost:8080/actuator/health` | HTTP 200, `"status":"UP"`, componente `db` (PostgreSQL) `UP` |
-| Leitura sem autenticação | `curl` em `GET /`, `GET /api/v1/qualquer-coisa`, `GET /actuator/env` | HTTP **401** |
-| Escrita sem autenticação | `POST /api/v1/qualquer-coisa` sem token CSRF | HTTP **403** (ver correção abaixo) |
+| backend | `./mvnw -B clean verify` | 16 testes unitários + 7 de integração, `BUILD SUCCESS` em 24,6 s |
+| frontend | `npm ci`, `format:check`, `lint`, `typecheck`, `test`, `build` | todos com `exit=0`; 17 testes; 0 vulnerabilidades |
 
-> **Correção (2026-09-12, F0-06).** Esta tabela registrava `POST → 401` como verificado com `curl`. O
-> resultado estava mascarado: o filtro de CSRF recusava o POST com 403, o Tomcat fazia um *error dispatch*
-> para `/error`, e esse dispatch exigia autenticação, reescrevendo o 403 como 401. O log DEBUG do Spring
-> Security confirmou a sequência. O dispatch de erro foi liberado e o status real agora é 403. O teste de
-> integração cobre isso, e foi confirmado que ele falha (`expected: 403 but was: 401`) quando a correção
-> é removida.
+## O que existe
 
-Duas correções foram necessárias para chegar aqui:
+### Infraestrutura
 
-1. **A aplicação não subia.** `application.yml` usava `spring.jackson.serialization.write-dates-as-timestamps`,
-   propriedade do Jackson 2. O Spring Boot 4 usa Jackson 3, em que a feature está em `DateTimeFeature`. A
-   propriedade correta é `spring.jackson.datatype.datetime.write-dates-as-timestamps`. Executei o Jackson
-   3.1.0 isoladamente para confirmar: a feature vem desligada por padrão, e `Instant` é serializado como
-   `"2026-09-12T17:00:00Z"`. O ADR-0002 foi corrigido com uma nota.
-2. **Requisições não autenticadas recebiam 403, não 401.** Com login por formulário e HTTP Basic desligados,
-   não havia *authentication entry point*, e o Spring Security caía no 403. O frontend decidido no ADR-0009
-   redireciona ao login ao receber 401, então isso quebraria o fluxo. Foi configurado um entry point que
-   responde 401.
+- `docker-compose.yml` com PostgreSQL 18, healthcheck, rede, volume e container com prefixo do projeto,
+  porta exposta só em `127.0.0.1` e fuso UTC.
+- Volume montado em `/var/lib/postgresql`, a raiz exigida pela imagem 18 (`show data_directory` →
+  `/var/lib/postgresql/18/docker`). Dados persistem após `docker compose down` + `up` (verificado).
+- `.env.example` só com placeholders; `.env` ignorado pelo Git.
 
-### Pendências de F0-04
+### Backend (Spring Boot 4.1.1, Java 21)
 
-- **Perfil `test`** separado ainda não existe (critério do roadmap).
-- **Teste ArchUnit** da regra de dependência entre módulos (prometido no ADR-0001) ainda não existe. A
-  versão da biblioteca precisa ser verificada antes.
-- O `GlobalExceptionHandler` existe, mas o formato `application/problem+json` **não foi verificado** com
-  uma requisição real. As respostas 401 acima vêm do Spring Security, não dele.
-- O log ainda mostra `Using generated security password`. Ela vem do usuário em memória que o Spring Boot
-  cria enquanto não existe um `UserDetailsService` próprio. Com formulário e Basic desligados, não serve
-  para autenticar nada, e desaparece na Fase 1.
-- `application.yml` lê a porta do banco de `DB_PORT` (padrão `5432`), mas o `.env` define `POSTGRES_PORT`.
-  Hoje os dois coincidem. Se alguém mudar `POSTGRES_PORT`, o backend não acompanha.
-- No log DEBUG, a requisição anônima recusada criava uma sessão HTTP para guardar a URL `/error`
-  (`HttpSessionRequestCache`). Com o dispatch de erro liberado, esse caso deixou de passar pela
-  autorização. **Não foi verificado** se o request cache padrão ainda cria sessões em respostas 401
-  comuns. Isso deve ser revisto na Fase 1, porque um SPA não usa o redirecionamento pós-login que o
-  request cache existe para servir.
+- **Banco:** Flyway aplica `V1__create_app_user.sql`; `ddl-auto=validate`; JDBC e Jackson em UTC/ISO-8601
+  (Jackson 3). A porta vem de `POSTGRES_PORT`, a mesma do Compose (verificado apontando para uma porta
+  vazia).
+- **Perfis:** `dev` lê o `.env` da raiz via `spring.config.import`, sem exportar variáveis (verificado no
+  PowerShell sem nenhuma variável definida). `test` fica em `src/test/resources` e isola os testes mesmo com
+  `SPRING_PROFILES_ACTIVE=dev` no ambiente.
+- **Segurança:**
+  - só `/actuator/health` é público;
+  - não autenticado recebe `401`, e escrita sem token CSRF recebe `403`;
+  - o *error dispatch* não mascara o status real;
+  - request cache desligado e token CSRF em cookie (`csrf.spa()`), então visitantes anônimos não criam
+    sessão;
+  - a senha gerada pelo Spring Boot não aparece mais no log.
+- **Erros:** `GlobalExceptionHandler` devolve `application/problem+json` para erros do Spring MVC e para
+  exceções inesperadas (500 com mensagem genérica), relançando as exceções do Spring Security.
+- **Identificadores:** `UuidV7` (RFC 9562), com `Clock` injetável.
 
-## F0-06 — Testes mínimos e CI: parcial
+### Frontend (React 19.2, TypeScript 6.0, Vite 8.3)
 
-Verificado em 2026-09-12:
+- Estrutura por feature (`app/`, `features/`, `shared/`), TypeScript estrito.
+- React Router 8 com as rotas Início, Calendário, Grupos, Notas e página para endereço inexistente.
+- Layout responsivo: menu lateral no desktop e barra inferior no celular (verificado no navegador em 375 px).
+- Área global (pesquisa, `+ Criar`, notificações, perfil) presente e desabilitada até existir.
+- Cliente axios com `withCredentials` e `withXSRFToken`.
+- TanStack Query consultando o health check, com estados de carregamento, sucesso e erro com nova
+  tentativa (verificado no navegador com o backend no ar e fora do ar).
+- Design tokens em CSS Modules, tema claro e escuro; 32 pares de cor verificados contra WCAG AA.
+- Acessibilidade: `lang="pt-BR"`, *skip link* (verificado com Tab), landmarks nomeados, `aria-current` no
+  menu, nomes acessíveis nos botões de ícone.
+- oxlint com regras de React, TypeScript e `jsx-a11y`, rodando com `--deny-warnings`; Prettier.
 
-| Critério de aceite | Situação | Evidência |
-|---|---|---|
-| Teste de integração que sobe o contexto contra PostgreSQL real e valida as migrations | **Pronto** | `FoundationIT` com Testcontainers e `postgres:18-alpine`: `./mvnw verify` → 7 testes, 0 falhas |
-| Teste de componente do frontend | Pendente | depende da F0-05 |
-| Workflow do GitHub Actions | Pendente | depende do repositório remoto |
+### Testes
 
-O que o `FoundationIT` cobre:
+| Suíte | Arquivo | Testes | Precisa de Docker |
+|---|---|---|---|
+| Backend unitário | `UuidV7Test` | 5 | Não |
+| Backend camada web | `GlobalExceptionHandlerTest` | 4 | Não |
+| Backend arquitetura | `ArchitectureTest` | 7 regras | Não |
+| Backend integração | `FoundationIT` | 7 | Sim |
+| Frontend | `http`, `getApiHealth`, `ApiStatus`, `AppLayout` | 17 | Não |
 
-- o Flyway registra `V1__create_app_user.sql` e nenhuma migration falhou;
-- a tabela `app_user` existe;
-- `GET /actuator/health` responde 200 e `"status":"UP"`, sem expor `components` a anônimos;
-- `GET /`, `GET /api/v1/qualquer-coisa` e `GET /actuator/env` respondem 401;
-- `POST` sem token CSRF responde 403, e não um 401 mascarado.
+**Verificação por mutação.** Cada comportamento crítico foi confirmado introduzindo o defeito de
+propósito, vendo o teste falhar e restaurando o código:
 
-Decisões de implementação:
+| Defeito introduzido | Teste que falhou |
+|---|---|
+| *Error dispatch* exigindo autenticação | `FoundationIT` (`expected: 403 but was: 401`) |
+| Request cache e CSRF em sessão | `FoundationIT` (4 testes, `JSESSIONID` emitido) |
+| Tratador genérico sem relançar as exceções do Spring Security | `GlobalExceptionHandlerTest` (`expected 403 but was 500`) |
+| Sem tratador genérico | `GlobalExceptionHandlerTest` |
+| Uma violação por regra de arquitetura | `ArchitectureTest` (7 de 7 regras) |
+| Testes sem `@ActiveProfiles("test")` e `dev` no ambiente | `FoundationIT` (detalhes do health expostos) |
+| `withXSRFToken: false`, 503 rejeitado, botão renomeado | testes do frontend (3 de 3) |
 
-- **Requisições HTTP reais** (`RANDOM_PORT` + `java.net.http.HttpClient`), e não MockMvc. O MockMvc não tem
-  *error dispatch*, então não detectaria a volta do mascaramento do 403.
-- **Container como bean com `@ServiceConnection`**, em vez do singleton `static` descrito no ADR-0001. A
-  diferença e o critério para revisitar estão registrados no próprio ADR.
-- **Surefire × Failsafe:** `*Test` roda em `./mvnw test` sem Docker; `*IT` roda em `./mvnw verify`.
-- O teste roda **sem `.env`**, como vai rodar na CI. O `${POSTGRES_PASSWORD}` sem valor padrão no
-  `application.yml` não atrapalha, porque o `@ServiceConnection` fornece as credenciais.
-- O Testcontainers removeu os próprios containers ao terminar (verificado com `docker ps -a`).
+Uma mutação **não** foi detectada, e o motivo foi investigado: trocar `end: true` por `false` no link
+"Início" não muda nada, porque o React Router já não marca o link raiz como ativo em sub-rotas. O `end`
+era redundante e foi removido.
 
-**Prova de que o teste protege contra o defeito:** com a liberação do dispatch de erro removida
-temporariamente, `./mvnw verify` falhou em `escritaSemTokenCsrf` com `expected: 403 but was: 401`.
-Restaurada a correção, a suíte voltou a passar.
+### Integração contínua
+
+`.github/workflows/ci.yml` com os jobs de backend e frontend. YAML validado com SnakeYAML, versões atuais
+das actions (`checkout@v7`, `setup-java@v6`, `setup-node@v7`) e permissão só de leitura. O `mvnw` foi
+marcado como executável no Git; ele estava com modo `100644`, o que faria a CI falhar no Linux.
 
 ## O que ainda NÃO existe
 
-Nada abaixo está implementado. Não apresentar nenhum destes itens como pronto.
-
-- frontend React/Vite (nem esqueleto);
-- qualquer entidade JPA, repositório, endpoint de negócio ou tela;
-- autenticação (a `SecurityConfiguration` atual apenas fecha a aplicação);
-- teste de componente do frontend (F0-06);
-- CI no GitHub Actions (F0-06);
+- qualquer entidade JPA, repositório, endpoint de negócio ou tela com funcionalidade;
+- autenticação (Fase 1);
+- geração de tipos TypeScript a partir do OpenAPI (ADR-0009): depende de a API ter documentação OpenAPI,
+  que entra junto com os primeiros endpoints;
 - seed de desenvolvimento;
-- instruções para subir o backend em `docs/local-development.md`;
-- repositório remoto no GitHub.
+- execução real da CI no GitHub Actions;
+- repositório remoto no GitHub;
+- licença.
+
+## Dívidas e pontos de atenção registrados
+
+- **Revisão adversarial dos ADRs.** Só o ADR-0003 passou por ela, e a revisão encontrou bugs reais. O
+  ADR-0002 mostrou um erro de configuração ao ser implementado. Revisar pelo menos o ADR-0008 (recorrência)
+  antes da Fase 4 e o ADR-0005 antes da Fase 3.
+- **Exclusão de `UserDetailsServiceAutoConfiguration`.** Pode ser removida quando a Fase 1 criar um
+  `UserDetailsService` próprio.
+- **Emissão do cookie CSRF após o login.** O `csrf.spa()` já está ligado, mas as armadilhas de emissão e
+  renovação do token após autenticar, descritas no ADR-0003, só podem ser testadas quando existir login.
+- **Testes de fatia JPA.** Quando surgirem, reavaliar o singleton `static` do container (ADR-0001).
 
 ## Ambiente verificado
 
-Diagnóstico inicial de 2026-09-09. Detalhes em [`../AGENTS.md`](../AGENTS.md#ambiente-verificado).
+Diagnóstico inicial de 2026-09-09; ferramentas de frontend verificadas em 2026-09-12. Detalhes em
+[`../AGENTS.md`](../AGENTS.md#ambiente-verificado).
 
 Java 21.0.10 · Maven Wrapper 3.9.16 · Node 24.15.0 · npm 11.12.1 · Docker 29.7.2 · Docker Compose v5.5.1 ·
 PostgreSQL 18.6 (container) · Git 2.53.0. PostgreSQL e GitHub CLI não estão instalados na máquina e, por
 decisão do projeto, não serão.
-
-Docker Desktop funcionando desde 2026-09-12.
 
 ## Configuração Git deste repositório
 
 - Branch principal: `main`.
 - Identidade configurada **apenas neste repositório** (`.git/config`), não globalmente.
 - Autenticação prevista: HTTPS + Git Credential Manager, conta pessoal `thiagojosetj`.
-- Remote: **ainda não configurado**. O repositório é local até a fundação estar pronta.
+- Mensagens de commit em português a partir de 2026-09-12.
+- Remote: **ainda não configurado**.
 
 ## Correções feitas a partir de verificação
 
 Registradas porque são exatamente o tipo de erro que passaria despercebido:
 
-- `spring-boot-starter-session-jdbc` **não existe**. O artefato real é
-  `org.springframework.session:spring-session-jdbc`. Descoberto consultando o Maven Central.
-- No Spring Boot 4 os starters mudaram de nome em relação ao 3.x: `spring-boot-starter-webmvc` (não
-  `-web`), `spring-boot-starter-security-oauth2-client` (não `-oauth2-client`), o Flyway ganhou starter
-  próprio, e os starters de teste são por módulo. Por isso o `pom.xml` veio do Spring Initializr, e não de
-  memória.
-- O Spring Boot 4 usa **Jackson 3** (pacote `tools.jackson`). Configurações de Jackson 2 podem impedir a
-  aplicação de subir. Ver F0-04 acima.
-- A imagem oficial do **PostgreSQL 18** exige o volume em `/var/lib/postgresql`. Ver F0-03 acima.
-- **Um `curl` pode mentir sobre o status.** Com o *error dispatch* protegido, um 403 de CSRF chegava ao
-  cliente como 401. Só a divergência com o teste de integração revelou o problema. Ver F0-04 e F0-06 acima.
-- No **Testcontainers 2**, `PostgreSQLContainer` fica em `org.testcontainers.postgresql`. No **Jackson 3**,
-  `JsonNode.asText()` deu lugar a `asString()`. Ambos verificados nos jars antes do uso.
+- `spring-boot-starter-session-jdbc` **não existe**; o artefato real é
+  `org.springframework.session:spring-session-jdbc`.
+- No Spring Boot 4 os starters mudaram de nome (`-webmvc`, `-security-oauth2-client`, starters de teste por
+  módulo), e o Jackson passou para a versão 3 (`tools.jackson`, `DateTimeFeature`).
+- A imagem do **PostgreSQL 18** exige o volume em `/var/lib/postgresql`.
+- **Um `curl` pode mentir sobre o status:** um 403 de CSRF chegava como 401 por causa do *error dispatch*.
+- **Anônimos criavam sessão HTTP** em 401 e 403, pelo request cache e pelo repositório de CSRF em sessão.
+- **O `mvnw` estava sem permissão de execução** no Git e quebraria qualquer build em Linux.
+- **O `create-vite` atual usa oxlint**, e não ESLint; o **TypeScript 6** já é estrito por padrão.
+- No **Testcontainers 2**, `PostgreSQLContainer` fica em `org.testcontainers.postgresql`; no **Jackson 3**,
+  `JsonNode.asText()` deu lugar a `asString()`; no **React Router 8**, `react-router-dom` foi unificado em
+  `react-router`.
 
 ## Próximo passo
 
-1. Fechar as pendências pequenas da F0-04: teste ArchUnit, perfil `test` e a divergência
-   `DB_PORT`/`POSTGRES_PORT`.
-2. F0-05: esqueleto do frontend.
-3. Criar o repositório no GitHub e o workflow de CI, para concluir a F0-06.
+1. Criar o repositório `shared-calendar` no GitHub pessoal, configurar o remote HTTPS e fazer o primeiro
+   push, observando a primeira execução real da CI.
+2. Fase 1, item F1-01: cadastro e login com e-mail e senha, sessão JDBC e CSRF ponta a ponta.

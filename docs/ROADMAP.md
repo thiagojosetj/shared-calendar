@@ -114,7 +114,7 @@ com banco em container e testes rodando de verdade.
 
 **Critérios de aceite.**
 - Projeto Vite com TypeScript em modo estrito.
-- ESLint e Prettier configurados e passando.
+- Lint (oxlint, ver ADR-0009) e Prettier configurados e passando.
 - Proxy de desenvolvimento para o backend funcionando.
 - Uma página que consome o health check do backend e trata carregamento e erro.
 - Layout base responsivo com o menu conceitual (`RN-UX-01`), ainda sem funcionalidades.

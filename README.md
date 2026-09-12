@@ -2,10 +2,11 @@
 
 Plataforma web colaborativa de agenda e calendários compartilhados, para pessoas e grupos.
 
-> **Status: Fase 0 — Fundação (em andamento).**
-> Neste momento o repositório contém especificação, arquitetura e documentação. O código da aplicação
-> ainda está sendo construído. Esta seção é atualizada a cada incremento — veja
-> [`docs/PROJECT_STATUS.md`](docs/PROJECT_STATUS.md) para o estado real e detalhado.
+> **Status: Fase 0 — Fundação concluída.**
+> O repositório tem especificação, arquitetura decidida em ADRs, banco em container, backend e frontend
+> executáveis, testes automatizados e workflow de integração contínua. As funcionalidades de produto começam
+> na Fase 1 (autenticação). O estado detalhado, com o que foi verificado e como, está em
+> [`docs/PROJECT_STATUS.md`](docs/PROJECT_STATUS.md).
 
 ---
 
@@ -53,6 +54,116 @@ essa separação é imposta no backend**, não escondida na interface.
 
 O objetivo não é um CRUD de calendário: é um sistema cujas **regras de negócio são a parte interessante**.
 
+## O que já existe
+
+A Fase 0 entrega a fundação, sem funcionalidades de produto ainda:
+
+- **Backend** Spring Boot que sobe contra o PostgreSQL, aplica migrations com Flyway e expõe apenas o health
+  check. Todo o resto responde 401. Visitantes anônimos não criam sessão, e erros saem em
+  `application/problem+json` sem vazar detalhe interno.
+- **Frontend** com o layout base e o menu principal (Início, Calendário, Grupos e Notas), responsivo, com
+  tema claro e escuro e contraste WCAG AA. A página inicial mostra se a API está acessível.
+- **Regras de arquitetura verificadas por teste:** separação entre módulos, proibição de `LocalDateTime` e
+  horário atual sempre vindo de um `Clock` injetável.
+- **Integração contínua** com os dois lados do projeto.
+
+## Tecnologias
+
+Versões efetivamente em uso no repositório.
+
+| Camada | Tecnologias |
+|---|---|
+| **Backend** | Java 21 · Spring Boot 4.1.1 (Spring Framework 7, Spring Security 7.1) · Spring Data JPA · Flyway · Jackson 3 |
+| **Banco** | PostgreSQL 18 |
+| **Frontend** | React 19.2 · TypeScript 6.0 · Vite 8.3 · React Router 8 · TanStack Query 5 · axios · CSS Modules |
+| **Testes** | JUnit · Testcontainers 2 · ArchUnit 1.5 · MockMvc · Vitest 5 · Testing Library |
+| **Qualidade** | oxlint (com regras de acessibilidade) · Prettier |
+| **Infraestrutura** | Docker · Docker Compose · GitHub Actions |
+
+## Como executar
+
+Pré-requisitos: **JDK 21**, **Node.js 20.19+ ou 22.12+** e **Docker Desktop** aberto. Maven e PostgreSQL
+não precisam estar instalados. O passo a passo completo, com troubleshooting, está em
+[`docs/local-development.md`](docs/local-development.md).
+
+**1. Configuração e banco** (na raiz do repositório):
+
+```bash
+cp .env.example .env
+```
+
+```bash
+docker compose up -d
+```
+
+**2. Backend** (na pasta `backend/`, no Git Bash, Linux ou macOS; no PowerShell use
+`.\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=dev"`):
+
+```bash
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+```
+
+**3. Frontend** (na pasta `frontend/`):
+
+```bash
+npm ci
+```
+
+```bash
+npm run dev
+```
+
+Abra `http://localhost:5173`. A página inicial deve mostrar "A API está disponível."
+
+## Testes
+
+| Onde | Comando | O que roda |
+|---|---|---|
+| `backend/` | `./mvnw test` | testes unitários, de camada web e regras de arquitetura (sem Docker) |
+| `backend/` | `./mvnw verify` | tudo acima + testes de integração contra PostgreSQL real (com Docker) |
+| `frontend/` | `npm run test` | testes de componentes, hooks e cliente HTTP |
+| `frontend/` | `npm run lint` · `npm run typecheck` · `npm run format:check` | qualidade estática |
+
+Os testes de regra crítica foram conferidos com **mutação**: o defeito é introduzido de propósito, o teste
+precisa falhar, e a correção é restaurada.
+
+## Estrutura do repositório
+
+```text
+shared-calendar/
+├── backend/                 aplicação Spring Boot (monólito modular por domínio)
+│   └── src/main/java/io/github/thiagojosetj/sharedcalendar/
+│       ├── config/          segurança, relógio e configuração transversal
+│       └── shared/          erros e identificadores usados por todos os módulos
+├── frontend/                SPA React
+│   └── src/
+│       ├── app/             rotas, layout e providers
+│       ├── features/        uma pasta por área do produto
+│       └── shared/          cliente HTTP, componentes de UI e estilos
+├── docs/                    roadmap, status, decisões e guia local
+│   └── adr/                 decisões arquiteturais
+├── .github/workflows/       integração contínua
+├── docker-compose.yml
+├── PROJECT_SPEC.md          regras de negócio numeradas (RN-*)
+└── AGENTS.md                como o trabalho é conduzido no repositório
+```
+
+## Decisões de arquitetura
+
+As escolhas caras de reverter estão registradas em ADRs, cada uma com as alternativas consideradas:
+
+| ADR | Decisão |
+|---|---|
+| [0001](docs/adr/0001-estrutura-do-repositorio-e-arquitetura-do-backend.md) | Monorepo, módulos por domínio verificados por ArchUnit, UUID v7 |
+| [0002](docs/adr/0002-datas-horas-e-fuso-horario.md) | `Instant` para momentos, `LocalDate` para dia inteiro, `Clock` injetável |
+| [0003](docs/adr/0003-autenticacao-e-sessao.md) | Sessão server-side com cookie HttpOnly em vez de JWT |
+| [0004](docs/adr/0004-modelo-de-autorizacao-rbac.md) | Papéis fixos + overrides resolvidos em um único ponto |
+| [0005](docs/adr/0005-eventos-em-multiplos-grupos.md) | Evento em vários grupos sem duplicação, autoridade ancorada na autoria |
+| [0006](docs/adr/0006-soft-delete-lixeira-e-auditoria.md) | Lixeira de 72h e audit log que sobrevive à purga |
+| [0007](docs/adr/0007-disponibilidade-e-privacidade.md) | Free/busy cujo tipo não carrega conteúdo de evento |
+| [0008](docs/adr/0008-modelo-de-eventos-recorrentes.md) | `RRULE` do RFC 5545 com expansão sob demanda |
+| [0009](docs/adr/0009-plataforma-do-frontend.md) | FullCalendar (MIT) atrás de adaptador, CSS Modules, oxlint |
+
 ## Documentação
 
 | Documento | Conteúdo |
@@ -61,36 +172,15 @@ O objetivo não é um CRUD de calendário: é um sistema cujas **regras de negó
 | [`AGENTS.md`](AGENTS.md) | Como o trabalho é conduzido neste repositório |
 | [`docs/ROADMAP.md`](docs/ROADMAP.md) | Fases, entregas e critérios de aceite |
 | [`docs/DECISIONS.md`](docs/DECISIONS.md) | Índice das decisões técnicas |
-| [`docs/adr/`](docs/adr/) | Decisões arquiteturais detalhadas |
-| [`docs/PROJECT_STATUS.md`](docs/PROJECT_STATUS.md) | O que já existe de fato |
-| [`docs/local-development.md`](docs/local-development.md) | Como executar o projeto localmente |
-
-## Tecnologias
-
-A stack está definida e as decisões estão registradas nos ADRs. As versões exatas passam a valer conforme
-cada parte é efetivamente construída — o [`PROJECT_STATUS.md`](docs/PROJECT_STATUS.md) sempre reflete o que
-já está no repositório.
-
-**Backend:** Java 21 · Spring Boot · Spring Web · Spring Security · Spring Data JPA · Bean Validation ·
-Flyway · JUnit · Testcontainers
-**Banco:** PostgreSQL
-**Frontend:** React · Vite · TypeScript
-**Infraestrutura:** Docker · Docker Compose
-
-## Como executar
-
-As instruções completas ficam em [`docs/local-development.md`](docs/local-development.md) e são escritas
-para quem está partindo de uma máquina limpa.
-
-Enquanto a Fase 0 não termina, ainda não existe aplicação executável. Assim que o primeiro fluxo vertical
-estiver de pé, esta seção passa a trazer os comandos reais, já testados.
+| [`docs/PROJECT_STATUS.md`](docs/PROJECT_STATUS.md) | O que já existe de fato e como foi verificado |
+| [`docs/local-development.md`](docs/local-development.md) | Execução local passo a passo e troubleshooting |
 
 ## Roadmap resumido
 
 | Fase | Escopo | Situação |
 |---|---|---|
-| 0 | Fundação: documentação, arquitetura, Docker, PostgreSQL, esqueleto de backend e frontend, testes mínimos | Em andamento |
-| 1 | Autenticação, perfil e calendário pessoal | Planejada |
+| 0 | Fundação: documentação, arquitetura, Docker, PostgreSQL, backend, frontend, testes e CI | Concluída* |
+| 1 | Autenticação, perfil e calendário pessoal | Próxima |
 | 2 | Grupos, papéis, permissões e convites | Planejada |
 | 3 | Eventos, participantes, RSVP e visualizações de calendário | Planejada |
 | 4 | Calendário avançado: recorrência, drag-and-drop, conflitos, pesquisa | Planejada |
@@ -99,6 +189,9 @@ estiver de pé, esta seção passa a trazer os comandos reais, já testados.
 | 7 | Disponibilidade e busca de horários em comum | Planejada |
 | 8 | Exportação/importação `.ics` e integrações externas | Planejada |
 | 9 | PWA, mobile, IA e apresentação de portfólio | Planejada |
+
+\* A CI foi validada executando localmente os mesmos passos do workflow. A primeira execução no GitHub
+Actions acontece quando o repositório for publicado.
 
 O detalhamento com critérios de aceite está em [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
