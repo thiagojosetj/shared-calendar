@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -32,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @WebMvcTest(controllers = GlobalExceptionHandlerTest.ControllerDeTeste.class)
 @Import({SecurityConfiguration.class, GlobalExceptionHandlerTest.ControllerDeTeste.class})
+@ActiveProfiles("test")
 @WithMockUser
 class GlobalExceptionHandlerTest {
 

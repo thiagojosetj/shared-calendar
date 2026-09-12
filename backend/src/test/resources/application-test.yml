@@ -1,0 +1,22 @@
+# Perfil dos testes de integração, ativado com @ActiveProfiles("test").
+#
+# Fica em src/test/resources, então não é empacotado no jar da aplicação.
+# O banco NÃO é configurado aqui: o Testcontainers fornece host, porta e credenciais via @ServiceConnection.
+
+spring:
+  main:
+    banner-mode: off
+
+management:
+  endpoint:
+    health:
+      # Explícito para que os testes sempre verifiquem o comportamento de produção, e nunca herdem o
+      # show-details: always do perfil dev.
+      show-details: when-authorized
+
+logging:
+  level:
+    # Menos ruído no console da CI, para que a causa de uma falha fique visível.
+    root: WARN
+    # Mantém a linha que informa o perfil ativo e os logs da própria aplicação.
+    io.github.thiagojosetj.sharedcalendar: INFO
