@@ -9,7 +9,8 @@ todos os módulos, salvo se um diretório receber futuramente um `AGENTS.md` mai
 - **Tipo:** projeto pessoal, fictício, original e evolutivo para estudo e portfólio.
 - **Produto:** plataforma web colaborativa de agenda e calendários para pessoas e grupos.
 - **Objetivo profissional:** demonstrar competências reais para vagas de Backend Java e Full Stack Júnior.
-- **Idioma:** documentação e interface em português; código, APIs, identificadores técnicos e commits em inglês.
+- **Idioma:** documentação, interface e mensagens de commit em português; código, APIs e identificadores
+  técnicos em inglês.
 - **Repositório:** GitHub pessoal do usuário (`thiagojosetj`).
 - **Forma de trabalho:** o agente implementa grande parte do projeto, mas deve explicar decisões relevantes
   para que o usuário consiga entender, testar e defender tecnicamente o código.
@@ -497,16 +498,25 @@ divergência com `origin/main`; mudanças preexistentes.
 
 Manter `main` estável. Usar branch de feature quando trouxer clareza real.
 
-Usar Conventional Commits em inglês:
+Usar Conventional Commits com **descrição em português**. O tipo do prefixo permanece em inglês, porque é
+um vocabulário padronizado que ferramentas de changelog e versionamento reconhecem:
 
 ```text
-feat: ...
-fix: ...
-test: ...
-docs: ...
-refactor: ...
-chore: ...
+feat: adiciona cadastro de usuário
+fix: corrige montagem do volume do PostgreSQL 18
+test: adiciona teste de integração da fundação
+docs: registra decisão sobre autenticação
+refactor: extrai política de permissões de evento
+chore: atualiza dependências do frontend
+build: ajusta configuração do Maven
+ci: adiciona workflow de integração contínua
 ```
+
+A descrição usa o verbo no presente do indicativo, em minúsculas e sem ponto final ("adiciona", "corrige",
+"remove"). O corpo, quando existir, explica o porquê da mudança.
+
+Os commits anteriores a 2026-09-12 estão em inglês. Eles não são reescritos: reescrever histórico já
+compartilhável custa mais do que a inconsistência vale.
 
 Regras de commit deste repositório:
 
