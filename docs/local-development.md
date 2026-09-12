@@ -48,7 +48,7 @@ docker compose ps
 | Porta do banco | `127.0.0.1:5432` | Configurável por `POSTGRES_PORT` no `.env` |
 | Volume de dados | `shared-calendar-postgres-data` | Sobrevive a `docker compose down` |
 | Rede | `shared-calendar-network` | |
-| Backend | `8080` | Ainda não existe |
+| Backend | `http://localhost:8080` | Health em `/actuator/health` |
 | Frontend (dev) | `5173` | Ainda não existe |
 
 Todos os nomes têm o prefixo `shared-calendar-` justamente para não colidir com outros projetos da máquina.
@@ -78,6 +78,45 @@ docker compose down -v     # APAGA o volume e todos os dados locais
 docker system prune        # afeta imagens/containers de TODOS os projetos
 docker volume prune        # idem, para volumes
 ```
+
+## Backend
+
+Com o banco `healthy`, suba o backend a partir da pasta `backend/`, no perfil `dev`.
+
+No PowerShell (as aspas são necessárias, senão o PowerShell interpreta o ponto do argumento):
+
+```powershell
+.\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=dev"
+```
+
+No Git Bash, Linux ou macOS:
+
+```bash
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+```
+
+**Não é preciso exportar nenhuma variável.** O perfil `dev` lê o `.env` da raiz do projeto diretamente
+(`spring.config.import` em `application-dev.yml`). Variáveis de ambiente, se existirem, continuam valendo.
+Testes e produção nunca leem o `.env`.
+
+A aplicação está pronta quando o log mostrar `Started SharedCalendarApplication`. Para conferir:
+
+```bash
+curl http://localhost:8080/actuator/health
+```
+
+No perfil `dev` a resposta mostra os componentes, e `db` deve estar `UP`. Qualquer outro endpoint responde
+401 enquanto a autenticação da Fase 1 não existir.
+
+O Flyway aplica as migrations pendentes automaticamente na inicialização. Para ver o que já foi aplicado:
+
+```bash
+docker compose exec postgres psql -U shared_calendar -d shared_calendar -c "select version, script, success from flyway_schema_history;"
+```
+
+**No IntelliJ IDEA:** abra a raiz do repositório, crie uma configuração *Spring Boot* para
+`SharedCalendarApplication`, defina *Active profiles* como `dev` e *Working directory* como a pasta
+`backend`. O diretório de trabalho importa, porque o `.env` é procurado em `../.env`.
 
 ## Fuso horário
 

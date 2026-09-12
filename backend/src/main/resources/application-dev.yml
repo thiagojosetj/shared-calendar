@@ -1,6 +1,13 @@
 # Perfil de desenvolvimento local.
-# Ativado com SPRING_PROFILES_ACTIVE=dev (definido no .env da raiz do projeto).
+# Ativado com `./mvnw spring-boot:run -Dspring-boot.run.profiles=dev` ou SPRING_PROFILES_ACTIVE=dev.
 spring:
+  config:
+    # Lê o .env da raiz do projeto como arquivo de propriedades, para que as credenciais do banco
+    # cheguem ao backend sem precisar exportar variáveis no shell — o que funciona igual no PowerShell,
+    # no Git Bash e no IntelliJ. O caminho é relativo à pasta backend/, que é o diretório de trabalho do
+    # spring-boot:run. "optional" evita erro se o arquivo não existir; nesse caso as variáveis de
+    # ambiente continuam valendo. Só o perfil dev lê o .env: testes e produção nunca o carregam.
+    import: optional:file:../.env[.properties]
   jpa:
     properties:
       hibernate:
