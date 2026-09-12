@@ -120,6 +120,12 @@ gerar um identificador. O JDK 21 não oferece fábrica de UUID v7.
 | `domain` | Entidades, value objects, invariantes e **policies de autorização** | Conhecer HTTP, JPA ou Spring |
 | `persistence` | Repositórios Spring Data, queries, projeções | Regra de negócio |
 
+> **Esclarecimento (2026-09-12).** A tabela diz que o `domain` não conhece JPA, mas as entidades JPA moram
+> no `domain`. Decisão pragmática: **anotações de mapeamento JPA (`jakarta.persistence`) são permitidas no
+> domínio**, porque separar entidade de domínio e entidade de persistência duplicaria cada classe sem ganho
+> nesta escala. O que o domínio não pode conhecer é HTTP (`org.springframework.web`, `jakarta.servlet`) nem
+> as camadas `api`, `application` e `persistence`. Essa é a interpretação verificada pelo `ArchitectureTest`.
+
 **Entidades JPA nunca são retornadas pela API.** Todo endpoint devolve um DTO ou uma projeção. Isso evita
 vazamento acidental de campos (`RN-SEC-05`), serialização de coleções lazy e acoplamento do contrato
 público ao schema.
