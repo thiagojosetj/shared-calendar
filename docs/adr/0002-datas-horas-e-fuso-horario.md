@@ -115,12 +115,19 @@ e não em produção.
 
 ```properties
 spring.jpa.properties.hibernate.jdbc.time_zone=UTC
-spring.jackson.serialization.write-dates-as-timestamps=false
+spring.jackson.datatype.datetime.write-dates-as-timestamps=false
 ```
 
 - `hibernate.jdbc.time_zone=UTC` garante que o driver JDBC não reinterprete valores usando o fuso da JVM.
 - Jackson serializa `Instant` como ISO-8601 com `Z` (`2026-09-12T17:00:00Z`) e `LocalDate` como
   `2026-09-12`. Nunca como número epoch — um número no JSON não diz se é segundo ou milissegundo.
+
+> **Correção (2026-09-12).** A primeira versão deste ADR citava
+> `spring.jackson.serialization.write-dates-as-timestamps`, que é a propriedade do Jackson 2. O Spring
+> Boot 4 usa Jackson 3, em que a feature foi movida de `SerializationFeature` para `DateTimeFeature`, e a
+> propriedade antiga impede a aplicação de subir. A decisão não mudou, apenas o nome da configuração.
+> Verificado executando o Jackson 3.1.0: a feature já vem desligada por padrão e a saída é exatamente a
+> descrita acima.
 
 ### 7. Contrato da API
 

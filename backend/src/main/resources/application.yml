@@ -28,9 +28,13 @@ spring:
     locations: classpath:db/migration
 
   jackson:
-    serialization:
-      # Instant vira "2026-09-12T17:00:00Z", não um número epoch ambíguo (ADR-0002).
-      write-dates-as-timestamps: false
+    datatype:
+      datetime:
+        # Instant vira "2026-09-12T17:00:00Z", não um número epoch ambíguo (ADR-0002).
+        # O Spring Boot 4 usa Jackson 3, onde esta feature saiu de SerializationFeature e foi
+        # para DateTimeFeature. No Jackson 3 ela já vem desligada por padrão; fica explícita
+        # aqui para que o contrato da API não dependa de um padrão da biblioteca.
+        write-dates-as-timestamps: false
     default-property-inclusion: non_null
 
 server:
