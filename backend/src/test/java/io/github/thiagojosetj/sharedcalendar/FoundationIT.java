@@ -88,6 +88,7 @@ class FoundationIT {
         HttpResponse<String> resposta = enviar(HttpRequest.newBuilder(url("/actuator/health")).GET());
 
         assertThat(resposta.statusCode()).isEqualTo(200);
+        assertNaoCriaSessao(resposta);
         JsonNode corpo = JSON.readTree(resposta.body());
         assertThat(corpo.path("status").asString()).isEqualTo("UP");
         // show-details: when-authorized. Um visitante anônimo não pode ver quais componentes
@@ -104,6 +105,8 @@ class FoundationIT {
         // 401 e não 403: "não autenticado" é diferente de "sem permissão", e o frontend depende
         // dessa diferença para redirecionar ao login (ADR-0009).
         assertThat(resposta.statusCode()).isEqualTo(401);
+        // O request cache criava uma sessão para cada 401 anônimo.
+        assertNaoCriaSessao(resposta);
     }
 
     @Test
@@ -115,6 +118,18 @@ class FoundationIT {
         // O filtro de CSRF roda antes da autorização e recusa a requisição com 403. Se o error dispatch
         // para /error voltar a exigir autenticação, este status vira 401 e o teste falha.
         assertThat(resposta.statusCode()).isEqualTo(403);
+        // O repositório de CSRF padrão guardava o token na sessão, criando uma sessão por POST anônimo.
+        assertNaoCriaSessao(resposta);
+    }
+
+    /**
+     * Visitantes anônimos não devem criar sessão HTTP. Na Fase 1 a sessão fica no PostgreSQL (ADR-0003),
+     * e cada requisição anônima que criasse sessão viraria uma linha no banco.
+     */
+    private static void assertNaoCriaSessao(HttpResponse<String> resposta) {
+        assertThat(resposta.headers().allValues("Set-Cookie"))
+                .as("cookies emitidos para um visitante anônimo")
+                .noneMatch(cookie -> cookie.startsWith("JSESSIONID="));
     }
 
     private URI url(String caminho) {
