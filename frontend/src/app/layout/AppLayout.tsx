@@ -55,7 +55,6 @@ export function AppLayout() {
             <li key={item.to}>
               <NavLink
                 to={item.to}
-                end={item.end}
                 className={({ isActive }) =>
                   isActive ? `${styles.navLink} ${styles.navLinkActive}` : styles.navLink
                 }
