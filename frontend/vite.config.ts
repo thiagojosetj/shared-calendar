@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
@@ -15,5 +16,12 @@ export default defineConfig({
       '/api': BACKEND_URL,
       '/actuator': BACKEND_URL,
     },
+  },
+  test: {
+    // jsdom simula o DOM do navegador para os testes de componente.
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.ts'],
+    // Um teste não pode herdar mocks deixados por outro.
+    restoreMocks: true,
   },
 })
