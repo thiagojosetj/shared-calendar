@@ -1,0 +1,77 @@
+# Integração contínua do Shared Calendar.
+#
+# Roda os mesmos comandos que um desenvolvedor roda localmente, em dois jobs independentes e paralelos.
+# Nenhum segredo é necessário: os testes de integração do backend sobem o próprio PostgreSQL com
+# Testcontainers, usando o Docker que já existe no runner do GitHub.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# O workflow só lê o código. Permissão mínima por padrão.
+permissions:
+  contents: read
+
+# Um novo push na mesma branch cancela a execução anterior, que já ficou desatualizada.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend (build, testes unitários, integração e arquitetura)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      # verify roda os testes unitários (Surefire) e os de integração com PostgreSQL real (Failsafe).
+      - name: Build e testes
+        run: ./mvnw -B verify
+
+  frontend:
+    name: Frontend (formatação, lint, tipos, testes e build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      # npm ci instala exatamente o que está no package-lock.json e falha se ele estiver desatualizado.
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Formatação
+        run: npm run format:check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Tipos
+        run: npm run typecheck
+
+      - name: Testes
+        run: npm run test
+
+      - name: Build
+        run: npm run build
