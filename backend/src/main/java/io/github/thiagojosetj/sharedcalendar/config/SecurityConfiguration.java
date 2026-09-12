@@ -2,9 +2,11 @@ package io.github.thiagojosetj.sharedcalendar.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 
 /**
  * Configuração de segurança da fundação (Fase 0).
@@ -25,10 +27,17 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
                         .anyRequest().authenticated())
-                // Sem login por formulário nem HTTP Basic: um SPA não usa nenhum dos dois, e deixar
-                // o padrão ligado geraria a senha aleatória no log de inicialização.
+                // Sem login por formulário nem HTTP Basic: um SPA não usa nenhum dos dois.
+                // A linha "Using generated security password" que ainda aparece no log vem do usuário
+                // em memória que o Spring Boot cria enquanto não existe um UserDetailsService próprio.
+                // Com form e Basic desligados ele não serve para autenticar nada, e some na Fase 1.
                 .formLogin(form -> form.disable())
-                .httpBasic(basic -> basic.disable());
+                .httpBasic(basic -> basic.disable())
+                // Sem um mecanismo de login ligado, o Spring Security responderia 403 a quem não está
+                // autenticado. O correto é 401: "não autenticado" é diferente de "autenticado sem
+                // permissão", e o frontend depende dessa diferença para redirecionar ao login (ADR-0009).
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)));
         return http.build();
     }
 }
