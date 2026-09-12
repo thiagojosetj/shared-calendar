@@ -102,6 +102,50 @@ netstat -ano | grep :5432
 **`POSTGRES_PASSWORD: defina POSTGRES_PASSWORD no arquivo .env`**
 O `.env` não existe ou está sem a variável. Rode `cp .env.example .env` e preencha.
 
+**Container em loop: `docker compose ps` mostra `Restarting (1)`**
+
+Sintoma: o container `shared-calendar-postgres` reinicia sem parar e nunca chega a `healthy`.
+`docker compose logs postgres` mostra:
+
+```text
+Error: in 18+, these Docker images are configured to store database data in a format which is
+compatible with pg_ctlcluster... there appears to be PostgreSQL data in: /var/lib/postgresql/data
+(unused mount/volume)
+```
+
+Causa: a partir do PostgreSQL 18, a imagem oficial passou a usar `/var/lib/postgresql` como raiz dos dados
+(o diretório real fica em `/var/lib/postgresql/18/docker`), em vez de `/var/lib/postgresql/data`. Um volume
+montado no caminho antigo é tratado como dado de outra versão, e a imagem se recusa a iniciar para não
+corromper nada. Mudança introduzida em
+[docker-library/postgres#1259](https://github.com/docker-library/postgres/pull/1259).
+
+Correção: o volume precisa ser montado na nova raiz. O `docker-compose.yml` do projeto já usa:
+
+```yaml
+volumes:
+  - postgres-data:/var/lib/postgresql
+```
+
+Se o erro apareceu em um clone antigo, atualize o `docker-compose.yml` e recrie o volume **somente se ele
+não tiver dados que você queira preservar** (o caso normal quando o banco nunca chegou a inicializar):
+
+```bash
+docker compose down
+docker volume rm shared-calendar-postgres-data
+docker compose up -d
+docker compose ps        # aguarde (healthy)
+```
+
+Se o volume tiver dados reais de um PostgreSQL 17 ou anterior, apagar o volume perde esses dados, e só
+trocar o caminho não resolve: é uma atualização de versão maior, que exige `pg_dump`/restauração ou
+`pg_upgrade`. Não use `docker compose down -v` em nenhum dos casos.
+
+Para confirmar onde os dados ficaram depois de subir:
+
+```bash
+docker compose exec postgres psql -U shared_calendar -d shared_calendar -c "show data_directory;"
+```
+
 **O healthcheck nunca fica `healthy`**
 Veja os logs com `docker compose logs postgres`. A causa mais comum é o volume ter sido criado antes com
 outro usuário/senha: o PostgreSQL só aplica `POSTGRES_USER` e `POSTGRES_PASSWORD` na **primeira**
