@@ -118,6 +118,23 @@ Cada feature agrupa componentes, hooks de dados e tipos. Espelhar os domínios d
   vertical estável (Fase 3+), conforme `AGENTS.md`.
 - Versões exatas são fixadas no momento do scaffold, verificadas então — não escritas de memória agora.
 
+> **Atualização (2026-09-12) — oxlint no lugar de ESLint.** O scaffold oficial (`create-vite` 9.2.1, com
+> React 19.2, Vite 8.3 e TypeScript 6.0) passou a gerar o projeto com **oxlint**, e não mais com ESLint.
+> A decisão foi manter o oxlint:
+>
+> - cobre o que este projeto precisa: regras de hooks (`rules-of-hooks`, `exhaustive-deps`), regras de
+>   TypeScript (`no-explicit-any` como erro) e o plugin **`jsx-a11y`**, que atende a RN-UX-09;
+> - exige um único arquivo de configuração e poucas dependências, em vez de ESLint mais `typescript-eslint`
+>   mais plugins separados;
+> - é o padrão atual do template oficial, o que reduz a configuração própria a manter.
+>
+> A configuração foi verificada contra um arquivo com problemas plantados de propósito: `any`, dependência
+> faltando em `useEffect`, `setState` síncrono em efeito, `<img>` sem `alt` e clique sem suporte a teclado.
+> Todos foram apontados como erro. O lint roda com `--deny-warnings`, então avisos também quebram a CI.
+>
+> Prettier continua responsável pela formatação. **Revisitar** se alguma regra necessária existir apenas no
+> ecossistema ESLint, em especial regras que dependem de informação de tipos.
+
 ### 9. Acessibilidade como requisito, não como polimento
 
 - foco visível e ordem de tabulação coerente; diálogos com foco preso e retorno ao gatilho;
