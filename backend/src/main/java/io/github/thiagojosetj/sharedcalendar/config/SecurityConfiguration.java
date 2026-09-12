@@ -1,5 +1,6 @@
 package io.github.thiagojosetj.sharedcalendar.config;
 
+import jakarta.servlet.DispatcherType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,13 @@ public class SecurityConfiguration {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize
+                        // Quando uma requisição é recusada (por exemplo, 403 por token CSRF ausente), o
+                        // Tomcat faz um "error dispatch" interno para /error, para renderizar a resposta.
+                        // Se esse dispatch também exigisse autenticação, o visitante anônimo cairia no
+                        // entry point e o 403 real seria reescrito como 401, além de criar uma sessão
+                        // só para guardar a URL /error. Liberar o dispatch de erro não expõe nenhum
+                        // recurso: a requisição original já foi negada, o dispatch só descreve o erro.
+                        .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
                         .anyRequest().authenticated())
                 // Sem login por formulário nem HTTP Basic: um SPA não usa nenhum dos dois.
