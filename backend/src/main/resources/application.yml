@@ -3,7 +3,9 @@ spring:
     name: shared-calendar
 
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${POSTGRES_DB:shared_calendar}
+    # Usa as mesmas variáveis do docker-compose.yml, para que mudar POSTGRES_PORT no .env mova o banco e o
+    # backend juntos. DB_HOST existe para quando o backend rodar em outro host ou em container.
+    url: jdbc:postgresql://${DB_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:shared_calendar}
     username: ${POSTGRES_USER:shared_calendar}
     # Sem valor padrão de propósito: a aplicação deve falhar ao subir se a senha não vier
     # do ambiente, em vez de tentar uma senha embutida.
