@@ -1,0 +1,74 @@
+/*
+ * Design tokens do Shared Calendar.
+ *
+ * Toda cor, espaçamento e raio usado nos componentes vem daqui. Os componentes nunca escrevem uma cor
+ * literal: assim o tema escuro é só uma troca destes valores, e a paleta pode mudar em um lugar só.
+ *
+ * Paleta própria (RN-UX-10): verde-petróleo como cor principal, âmbar como destaque decorativo e um fundo
+ * de papel levemente quente. Os pares de texto/fundo foram verificados contra o contraste mínimo da
+ * WCAG AA (4,5:1 para texto, 3:1 para indicador de foco).
+ */
+
+:root {
+  color-scheme: light;
+
+  --color-bg: #f6f4ef;
+  --color-surface: #ffffff;
+  --color-surface-muted: #eeebe3;
+  --color-border: #d9d4c7;
+  --color-text: #1d2426;
+  --color-text-muted: #545e60;
+  --color-primary: #0d5c63;
+  --color-primary-hover: #0a474d;
+  --color-on-primary: #ffffff;
+  --color-accent: #e9a23b;
+  --color-success: #1d6f46;
+  --color-danger: #a8261d;
+  --color-focus: #0d5c63;
+
+  --font-family:
+    'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.75rem;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-full: 999px;
+
+  --shadow-card: 0 1px 2px rgb(29 36 38 / 8%), 0 2px 8px rgb(29 36 38 / 6%);
+
+  --layout-header-height: 3.5rem;
+  --layout-sidebar-width: 13.5rem;
+  --layout-bottom-nav-height: 3.75rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    --color-bg: #121a1c;
+    --color-surface: #1a2427;
+    --color-surface-muted: #223033;
+    --color-border: #33464a;
+    --color-text: #e8ecea;
+    --color-text-muted: #a7b4b3;
+    --color-primary: #5fc4c9;
+    --color-primary-hover: #86d6da;
+    --color-on-primary: #0b2a2d;
+    --color-accent: #f0b65a;
+    --color-success: #6fd39c;
+    --color-danger: #ff8a80;
+    --color-focus: #5fc4c9;
+
+    --shadow-card: 0 1px 2px rgb(0 0 0 / 40%);
+  }
+}
