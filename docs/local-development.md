@@ -85,6 +85,33 @@ O container roda em **UTC** (`TZ` e `PGTZ`). Isso é deliberado: nenhuma regra d
 fuso do servidor ([ADR-0002](adr/0002-datas-horas-e-fuso-horario.md)). Se algum código depender, precisa
 quebrar aqui, em desenvolvimento — e não em produção, para um usuário em outro fuso.
 
+## Testes do backend
+
+Os testes ficam em dois grupos, separados pelo sufixo do nome da classe:
+
+| Grupo | Sufixo | Plugin | Comando | Precisa de Docker? |
+|---|---|---|---|---|
+| Unitários | `*Test` | Surefire | `./mvnw test` | Não |
+| Integração | `*IT` | Failsafe | `./mvnw verify` (roda os dois grupos) | **Sim** |
+
+Execute a partir da pasta `backend/`:
+
+```bash
+./mvnw test
+```
+
+```bash
+./mvnw verify
+```
+
+Os testes de integração **não usam** o banco do `docker-compose.yml` nem o `.env`. O Testcontainers sobe um
+PostgreSQL próprio (`postgres:18-alpine`, a mesma imagem do Compose) em uma porta aleatória, e remove o
+container ao terminar. Por isso eles funcionam em uma máquina sem `.env` e na CI, e não conflitam com o
+banco de desenvolvimento, mesmo que ele esteja rodando na 5432.
+
+Se `./mvnw verify` falhar com erro de conexão ao Docker, o Docker Desktop está fechado. Veja o primeiro
+item do troubleshooting abaixo.
+
 ## Troubleshooting
 
 **`failed to connect to the docker API` / `dockerDesktopLinuxEngine`**
@@ -170,5 +197,5 @@ git rm --cached -r . && git reset --hard
 
 ## Ainda não disponível
 
-Backend, frontend, migrations, seed de desenvolvimento e testes serão documentados aqui conforme forem
-implementados. O estado atual está em [`PROJECT_STATUS.md`](PROJECT_STATUS.md).
+Como subir o backend localmente, o frontend e o seed de desenvolvimento serão documentados aqui conforme
+forem implementados e validados. O estado atual está em [`PROJECT_STATUS.md`](PROJECT_STATUS.md).

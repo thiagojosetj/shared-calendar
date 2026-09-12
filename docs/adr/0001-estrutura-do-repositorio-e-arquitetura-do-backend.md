@@ -164,6 +164,17 @@ Para não pagar o custo de subir um container por classe de teste, usa-se o **pa
 uma classe base declara o container como `static`, iniciado uma vez por JVM, com as propriedades injetadas
 via `@DynamicPropertySource`.
 
+> **Nota de implementação (2026-09-12).** O primeiro teste de integração (F0-06) usa outro mecanismo para o
+> mesmo objetivo. O container é declarado como bean em uma `@TestConfiguration` com `@ServiceConnection`, o
+> padrão gerado pelo Spring Initializr para o Boot 4.1.1. O Spring Boot lê as credenciais do container
+> sozinho, e o container é reaproveitado enquanto o contexto de teste estiver no cache do Spring. Na
+> prática, classes com a mesma configuração compartilham um único container. A decisão (PostgreSQL real,
+> sem um container por classe) não mudou. **Revisitar** quando surgirem testes de fatia (`@DataJpaTest`),
+> que usam outro contexto e subiriam outro container: aí o singleton `static` volta a se justificar.
+>
+> Testes de integração usam o sufixo `IT` e rodam pelo Failsafe em `./mvnw verify`. Testes unitários
+> usam `Test` e rodam pelo Surefire em `./mvnw test`, sem Docker.
+
 ## Consequências
 
 **Positivas.**
