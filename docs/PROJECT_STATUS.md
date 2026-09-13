@@ -4,7 +4,7 @@ Estado **real** do repositório. Este documento descreve apenas o que já existe
 ficam em [`ROADMAP.md`](ROADMAP.md).
 
 **Última atualização:** 2026-09-12
-**Fase atual:** Fase 0 — Fundação, **concluída** com uma ressalva (a CI ainda não rodou no GitHub)
+**Fase atual:** Fase 0 — Fundação, **concluída**
 **Próxima fase:** Fase 1 — Autenticação, perfil e calendário pessoal
 
 ---
@@ -18,7 +18,7 @@ ficam em [`ROADMAP.md`](ROADMAP.md).
 | F0-03 Infraestrutura local | Concluído | — |
 | F0-04 Esqueleto do backend | Concluído | — |
 | F0-05 Esqueleto do frontend | Concluído | — |
-| F0-06 Testes mínimos e CI | Concluído localmente | O workflow foi validado executando seus passos localmente; a primeira execução real no GitHub Actions depende do repositório remoto |
+| F0-06 Testes mínimos e CI | Concluído | Primeira execução real no GitHub Actions verde em 2026-09-13 (ver abaixo) |
 
 ## Como a Fase 0 foi verificada
 
@@ -122,9 +122,7 @@ marcado como executável no Git; ele estava com modo `100644`, o que faria a CI 
 - autenticação (Fase 1);
 - geração de tipos TypeScript a partir do OpenAPI (ADR-0009): depende de a API ter documentação OpenAPI,
   que entra junto com os primeiros endpoints;
-- seed de desenvolvimento;
-- execução real da CI no GitHub Actions;
-- repositório remoto no GitHub.
+- seed de desenvolvimento.
 
 ## Dívidas e pontos de atenção registrados
 
@@ -152,7 +150,22 @@ decisão do projeto, não serão.
 - Identidade configurada **apenas neste repositório** (`.git/config`), não globalmente.
 - Autenticação prevista: HTTPS + Git Credential Manager, conta pessoal `thiagojosetj`.
 - Mensagens de commit em português a partir de 2026-09-12.
-- Remote: **ainda não configurado**.
+- Remote: `origin` → `https://github.com/thiagojosetj/shared-calendar.git`, **público**, licença MIT.
+
+### Publicação (2026-09-13)
+
+- **Primeiro push:** `main` publicada em 2026-09-13. Antes da publicação, o histórico local foi reescrito
+  (ainda sem nenhum push) para remover da documentação dados do ambiente de trabalho e o e-mail pessoal. O
+  código final ficou idêntico, verificado pela árvore do último commit.
+- **Repositório já existente:** o GitHub já tinha uma versão anterior e independente da Fase 0 (um único
+  commit de 2026-09-03), com a mesma proposta. Ela foi comparada com esta, executando os builds e testes das
+  duas. Esta foi mantida por ser mais completa e verificada: tem segurança base, CI, testes de frontend,
+  Testcontainers e histórico incremental.
+- **Ideia aproveitada da versão anterior:** a entidade `calendars` (PERSONAL/GROUP) é melhor que o
+  calendário pessoal implícito do ADR-0005, e foi registrada como decisão a tomar no início da Fase 1.
+- **CI:** a primeira execução real terminou com `success`. O job de backend levou 58 s (`./mvnw -B verify`,
+  incluindo Testcontainers no runner) e o de frontend 19 s (instalação, formatação, lint, tipos, testes e
+  build).
 
 ## Correções feitas a partir de verificação
 
@@ -173,6 +186,6 @@ Registradas porque são exatamente o tipo de erro que passaria despercebido:
 
 ## Próximo passo
 
-1. Criar o repositório `shared-calendar` no GitHub pessoal, configurar o remote HTTPS e fazer o primeiro
-   push, observando a primeira execução real da CI.
-2. Fase 1, item F1-01: cadastro e login com e-mail e senha, sessão JDBC e CSRF ponta a ponta.
+Fase 1, primeira parte (F1-01 a F1-04): decidir a modelagem de `calendars`, depois cadastro, login,
+logout, perfil, calendário pessoal e as telas correspondentes, na branch `feat/fase-1-autenticacao`, com
+revisão antes do merge na `main`.

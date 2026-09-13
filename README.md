@@ -179,7 +179,7 @@ As escolhas caras de reverter estão registradas em ADRs, cada uma com as altern
 
 | Fase | Escopo | Situação |
 |---|---|---|
-| 0 | Fundação: documentação, arquitetura, Docker, PostgreSQL, backend, frontend, testes e CI | Concluída* |
+| 0 | Fundação: documentação, arquitetura, Docker, PostgreSQL, backend, frontend, testes e CI | Concluída |
 | 1 | Autenticação, perfil e calendário pessoal | Próxima |
 | 2 | Grupos, papéis, permissões e convites | Planejada |
 | 3 | Eventos, participantes, RSVP e visualizações de calendário | Planejada |
@@ -190,8 +190,6 @@ As escolhas caras de reverter estão registradas em ADRs, cada uma com as altern
 | 8 | Exportação/importação `.ics` e integrações externas | Planejada |
 | 9 | PWA, mobile, IA e apresentação de portfólio | Planejada |
 
-\* A CI foi validada executando localmente os mesmos passos do workflow. A primeira execução no GitHub
-Actions acontece quando o repositório for publicado.
 
 O detalhamento com critérios de aceite está em [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
