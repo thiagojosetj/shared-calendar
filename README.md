@@ -197,4 +197,4 @@ O detalhamento com critérios de aceite está em [`docs/ROADMAP.md`](docs/ROADMA
 
 ## Licença
 
-A definir antes da publicação do repositório como público.
+Distribuído sob a licença MIT. Veja [`LICENSE`](LICENSE).

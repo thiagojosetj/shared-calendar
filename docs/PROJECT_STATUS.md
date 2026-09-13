@@ -124,8 +124,7 @@ marcado como executável no Git; ele estava com modo `100644`, o que faria a CI 
   que entra junto com os primeiros endpoints;
 - seed de desenvolvimento;
 - execução real da CI no GitHub Actions;
-- repositório remoto no GitHub;
-- licença.
+- repositório remoto no GitHub.
 
 ## Dívidas e pontos de atenção registrados
 
