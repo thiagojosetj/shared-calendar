@@ -54,7 +54,6 @@ com banco em container e testes rodando de verdade.
 
 **Critérios de aceite.**
 - `PROJECT_SPEC.md` contém as regras de negócio numeradas e os casos de uso de referência.
-- `AGENTS.md` descreve como o trabalho é conduzido e registra o ambiente verificado.
 - `README.md` descreve o problema, a proposta e o status real.
 - `docs/ROADMAP.md`, `docs/DECISIONS.md` e `docs/PROJECT_STATUS.md` existem.
 - `.gitignore` cobre secrets, builds, IDE e artefatos; `.gitattributes` normaliza fim de linha.

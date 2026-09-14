@@ -92,5 +92,6 @@ pgdata/
 # Ferramentas de agente / scratch
 # ---------------------------------------------------------------------------
 .claude/settings.local.json
+AGENTS.md
 scratch/
 tmp/

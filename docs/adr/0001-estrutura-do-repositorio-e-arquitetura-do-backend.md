@@ -25,7 +25,6 @@ shared-calendar/
 ├── docs/             # documentação, ADRs
 ├── docker-compose.yml
 ├── .env.example
-├── AGENTS.md
 ├── PROJECT_SPEC.md
 └── README.md
 ```

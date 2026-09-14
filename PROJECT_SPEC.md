@@ -569,7 +569,6 @@ Explicitamente **não** fazem parte deste produto:
 | Documento | Papel |
 |---|---|
 | `PROJECT_SPEC.md` (este arquivo) | O que o sistema faz. Regras `RN-*`. |
-| `AGENTS.md` | Como o trabalho é conduzido no repositório. |
 | `docs/ROADMAP.md` | Em que ordem construir, com critérios de aceite. |
 | `docs/DECISIONS.md` | Índice das decisões técnicas. |
 | `docs/adr/` | Decisões arquiteturais detalhadas. |

@@ -22,7 +22,7 @@ para o que a spec pede (mês, semana, dia, agenda/lista, drag-and-drop, resize).
 Portanto FullCalendar atende integralmente o produto sob licença MIT, o que é obrigatório para um
 repositório de portfólio público.
 
-**Restrição de arquitetura:** `AGENTS.md` exige não acoplar regra de negócio à biblioteca visual. O
+**Restrição de arquitetura:** regra de negócio não pode ficar acoplada à biblioteca visual. O
 FullCalendar fica encapsulado em um único componente adaptador que traduz entre o modelo do domínio do
 frontend e o formato dele. O resto da aplicação nunca importa `@fullcalendar/*`.
 
@@ -115,7 +115,7 @@ Cada feature agrupa componentes, hooks de dados e tipos. Espelhar os domínios d
 - **TypeScript em modo estrito.** `any` só com comentário justificando; verificado por regra de lint.
 - **ESLint (flat config) + Prettier**, rodando na CI.
 - **Vitest + Testing Library** para componentes e hooks; Playwright fica para quando existir um fluxo
-  vertical estável (Fase 3+), conforme `AGENTS.md`.
+  vertical estável (Fase 3+).
 - Versões exatas são fixadas no momento do scaffold, verificadas então — não escritas de memória agora.
 
 > **Atualização (2026-09-12) — oxlint no lugar de ESLint.** O scaffold oficial (`create-vite` 9.2.1, com
