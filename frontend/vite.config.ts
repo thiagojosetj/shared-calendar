@@ -4,7 +4,8 @@ import { defineConfig } from 'vite'
 
 // Em desenvolvimento, o Vite (porta 5173) repassa ao backend (porta 8080) as chamadas de API e de
 // health check. Para o navegador tudo acontece na mesma origem, então o cookie de sessão e o token
-// CSRF funcionam sem CORS (ADR-0003). Em produção o próprio Spring serve o build, com o mesmo efeito.
+// CSRF funcionam sem CORS (ADR-0003). O plano para produção é o próprio Spring servir o build, com o mesmo
+// efeito.
 const BACKEND_URL = process.env.BACKEND_URL ?? 'http://localhost:8080'
 
 export default defineConfig({

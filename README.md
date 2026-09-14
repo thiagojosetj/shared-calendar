@@ -1,5 +1,8 @@
 # Shared Calendar
 
+[![CI](https://github.com/thiagojosetj/shared-calendar/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/thiagojosetj/shared-calendar/actions/workflows/ci.yml)
+[![Licença: MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-blue.svg)](LICENSE)
+
 Plataforma web colaborativa de agenda e calendários compartilhados, para pessoas e grupos.
 
 > **Status: Fase 0 — Fundação concluída.**
@@ -41,16 +44,19 @@ essa separação é imposta no backend**, não escondida na interface.
 
 É um projeto pessoal de portfólio, construído para exercitar e demonstrar, em um domínio realista:
 
-| Tema | Onde aparece no produto |
-|---|---|
-| Autenticação | e-mail/senha e login com Google (OAuth2) |
-| Autorização e RBAC | quatro papéis por grupo, catálogo de permissões e overrides por membro |
-| Modelagem relacional não trivial | evento pertencente a vários grupos, participantes, recorrência, notas |
-| Datas e fusos horários | evento de dia inteiro vs. com horário, multi-dia, horário de verão, participantes em fusos diferentes |
-| Processamento agendado idempotente | lembretes e purga da lixeira sem envio ou remoção duplicada |
-| Privacidade aplicada no servidor | free/busy sem vazar detalhes; notas privadas; busca que respeita permissões |
-| Soft delete e auditoria | lixeira com janela de 72h e histórico de ações de negócio |
-| Infraestrutura reproduzível | PostgreSQL em container, migrations versionadas, testes de integração reais |
+A tabela mostra onde cada tema vai aparecer no produto e em qual fase do roadmap ele entra. Só a fundação
+(Fase 0) está implementada.
+
+| Tema | Onde vai aparecer no produto | Fase |
+|---|---|---|
+| Autenticação | e-mail/senha e login com Google (OAuth2) | 1 |
+| Autorização e RBAC | quatro papéis por grupo, catálogo de permissões e overrides por membro | 2 |
+| Modelagem relacional não trivial | evento pertencente a vários grupos, participantes, recorrência, notas | 3 a 5 |
+| Datas e fusos horários | evento de dia inteiro vs. com horário, multi-dia, horário de verão, participantes em fusos diferentes | 3 e 4 |
+| Processamento agendado idempotente | lembretes e purga da lixeira sem envio ou remoção duplicada | 5 e 6 |
+| Privacidade aplicada no servidor | free/busy sem vazar detalhes; notas privadas; busca que respeita permissões | 4, 5 e 7 |
+| Soft delete e auditoria | lixeira com janela de 72h e histórico de ações de negócio | 3 e 5 |
+| Infraestrutura reproduzível | PostgreSQL em container, migrations versionadas, testes de integração reais | 0 (pronto) |
 
 O objetivo não é um CRUD de calendário: é um sistema cujas **regras de negócio são a parte interessante**.
 
@@ -59,7 +65,8 @@ O objetivo não é um CRUD de calendário: é um sistema cujas **regras de negó
 A Fase 0 entrega a fundação, sem funcionalidades de produto ainda:
 
 - **Backend** Spring Boot que sobe contra o PostgreSQL, aplica migrations com Flyway e expõe apenas o health
-  check. Todo o resto responde 401. Visitantes anônimos não criam sessão, e erros saem em
+  check. Leituras sem autenticação respondem 401 e escritas sem token CSRF, 403. Visitantes anônimos não
+  criam sessão, e erros saem em
   `application/problem+json` sem vazar detalhe interno.
 - **Frontend** com o layout base e o menu principal (Início, Calendário, Grupos e Notas), responsivo, com
   tema claro e escuro e contraste WCAG AA. A página inicial mostra se a API está acessível.
@@ -144,8 +151,7 @@ shared-calendar/
 │   └── adr/                 decisões arquiteturais
 ├── .github/workflows/       integração contínua
 ├── docker-compose.yml
-├── PROJECT_SPEC.md          regras de negócio numeradas (RN-*)
-└── AGENTS.md                como o trabalho é conduzido no repositório
+└── PROJECT_SPEC.md          regras de negócio numeradas (RN-*)
 ```
 
 ## Decisões de arquitetura
@@ -169,7 +175,6 @@ As escolhas caras de reverter estão registradas em ADRs, cada uma com as altern
 | Documento | Conteúdo |
 |---|---|
 | [`PROJECT_SPEC.md`](PROJECT_SPEC.md) | Regras de negócio numeradas (`RN-*`), glossário e casos de uso de referência |
-| [`AGENTS.md`](AGENTS.md) | Como o trabalho é conduzido neste repositório |
 | [`docs/ROADMAP.md`](docs/ROADMAP.md) | Fases, entregas e critérios de aceite |
 | [`docs/DECISIONS.md`](docs/DECISIONS.md) | Índice das decisões técnicas |
 | [`docs/PROJECT_STATUS.md`](docs/PROJECT_STATUS.md) | O que já existe de fato e como foi verificado |

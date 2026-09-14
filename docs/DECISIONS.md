@@ -31,28 +31,22 @@ zero, ficam listadas aqui mesmo.
 
 ### D-01 — Localização e identidade do repositório
 
-**Decisão.** O projeto vive em `E:\Estudos\Programacao\projetos-com-codex\shared-calendar`, junto dos
-demais projetos pessoais da máquina. A identidade Git é configurada **apenas no repositório local**
-(`--local`), nunca globalmente.
+**Decisão.** O repositório pertence à conta pessoal `thiagojosetj`, e a identidade Git é configurada
+**apenas no repositório local** (`--local`), nunca globalmente.
 
-**Contexto.** A especificação original assumia um computador de trabalho com conta profissional de GitHub
-a preservar. O diagnóstico de 2026-09-09 mostrou que a máquina de desenvolvimento é pessoal, que a
-identidade Git global **já é a pessoal**, e que não há conta profissional para isolar.
-
-**Consequência.** As regras de isolamento de conta profissional continuam registradas em `AGENTS.md` e
-voltam a valer integralmente se o projeto for aberto em um computador de trabalho.
+**Contexto.** Configurar a identidade por repositório evita que commits deste projeto saiam com outra
+identidade configurada na máquina.
 
 ### D-02 — Autenticação Git por HTTPS, não por SSH
 
-**Decisão.** Usar HTTPS + Git Credential Manager, como os demais repositórios pessoais desta máquina. Não
-gerar chave SSH dedicada nem criar alias `github-personal` por enquanto.
+**Decisão.** Usar HTTPS + Git Credential Manager. Não gerar chave SSH dedicada nem criar alias por
+enquanto.
 
-**Contexto.** A especificação previa uma chave SSH separada e um alias para isolar contas. Sem uma segunda
-conta na máquina, essa estrutura resolveria um problema inexistente e adicionaria uma peça a mais para
-manter. Os repositórios `studyflow` e `pagina-investimentos` já usam HTTPS com sucesso.
+**Contexto.** Uma chave SSH separada e um alias só se justificam quando há mais de uma conta GitHub no
+mesmo ambiente. Sem essa necessidade, a estrutura adicionaria uma peça a mais para manter.
 
-**Quando revisitar.** Se o projeto passar a ser desenvolvido também em um computador com conta
-profissional configurada, ou se o usuário quiser usar SSH por preferência.
+**Quando revisitar.** Se for preciso usar mais de uma conta GitHub no mesmo ambiente, ou por preferência
+por SSH.
 
 ### D-03 — Monorepo com backend e frontend no mesmo repositório
 

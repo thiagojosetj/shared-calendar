@@ -137,12 +137,10 @@ marcado como executável no Git; ele estava com modo `100644`, o que faria a CI 
 
 ## Ambiente verificado
 
-Diagnóstico inicial de 2026-09-09; ferramentas de frontend verificadas em 2026-09-12. Detalhes em
-[`../AGENTS.md`](../AGENTS.md#ambiente-verificado).
+Diagnóstico inicial de 2026-09-09; ferramentas de frontend verificadas em 2026-09-12.
 
 Java 21.0.10 · Maven Wrapper 3.9.16 · Node 24.15.0 · npm 11.12.1 · Docker 29.7.2 · Docker Compose v5.5.1 ·
-PostgreSQL 18.6 (container) · Git 2.53.0. PostgreSQL e GitHub CLI não estão instalados na máquina e, por
-decisão do projeto, não serão.
+PostgreSQL 18.6 (container) · Git 2.53.0. O PostgreSQL roda somente em container.
 
 ## Configuração Git deste repositório
 
@@ -155,7 +153,7 @@ decisão do projeto, não serão.
 ### Publicação (2026-09-13)
 
 - **Primeiro push:** `main` publicada em 2026-09-13. Antes da publicação, o histórico local foi reescrito
-  (ainda sem nenhum push) para remover da documentação dados do ambiente de trabalho e o e-mail pessoal. O
+  (ainda sem nenhum push) para remover da documentação dados pessoais e detalhes do ambiente local. O
   código final ficou idêntico, verificado pela árvore do último commit.
 - **Repositório já existente:** o GitHub já tinha uma versão anterior e independente da Fase 0 (um único
   commit de 2026-09-03), com a mesma proposta. Ela foi comparada com esta, executando os builds e testes das
